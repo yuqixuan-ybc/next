@@ -1,9 +1,9 @@
-name: Deploy Docs to Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [master]  # 设置要部署的源码分支
-  workflow_dispatch:    # 支持手动触发部署
+    branches: [ "master" ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,31 +12,33 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: '16'
           cache: 'npm'
-      
-      - name: Install Dependencies
+          
+      - name: Install dependencies
         run: npm install
-      
-      - name: Build Docs
-        run: npm run build-docs  # 根据实际的构建命令调整
-      
+        
+      - name: Build documentation
+        run: npm run build:docs
+        
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v2
         with:
-          path: ./site/build  # 根据实际的文档构建输出目录调整
+          path: 'docs/build'
 
   deploy:
     environment:
@@ -47,4 +49,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v3
